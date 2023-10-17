@@ -49,9 +49,11 @@ contract BondingCurveToken is ERC20 {
             revert InsufficientTokensToSell(balanceOf(msg.sender), amount);
         }
 
-        _burn(msg.sender, amount);
-
         uint256 weiToReturn = sellPriceInWei(amount);
+
+        // Note that it's crucial to burn the tokens only AFTER the price has been computed since the price 
+        // formula depends on the total supply
+        _burn(msg.sender, amount);
 
         lastTransactionTime[msg.sender] = block.timestamp;
 
