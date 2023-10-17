@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
 
-import {ERC20} from "solmate/tokens/ERC20.sol";
+import {ERC20} from "@openzeppelin/contracts@5.0.0/token/ERC20/ERC20.sol";
 
 contract BondingCurveToken is ERC20 {
     uint256 public constant SLOPE = 0.0001 ether;
@@ -14,7 +14,7 @@ contract BondingCurveToken is ERC20 {
         _;
     }
 
-    constructor() ERC20("BondingCurveToken", "BCT", 0) {}
+    constructor() ERC20("BondingCurveToken", "BCT") {}
 
     function buy(uint256 amount) external payable {
         uint256 cost = buyPriceInWei(amount);
@@ -35,6 +35,10 @@ contract BondingCurveToken is ERC20 {
         require(success, "Failed to transfer ether payout");
 
         lastTransactionTime[msg.sender] = block.timestamp;
+    }
+
+    function decimals() public view override returns (uint8) {
+        return 0;
     }
 
     function transfer(address recipient, uint256 amount)
