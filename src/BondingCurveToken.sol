@@ -4,6 +4,8 @@ pragma solidity 0.8.20;
 import {ERC20} from "@openzeppelin/contracts@5.0.0/token/ERC20/ERC20.sol";
 
 contract BondingCurveToken is ERC20 {
+    // IMPORTANT: SLOPE needs to be a multiple of 2 wei to avoid rounding errors in buyPriceInWei and sellPriceInWei
+    // due to the division by 2 at the end of the respective formula.
     uint256 public constant SLOPE = 0.0001 ether;
     uint256 public constant COOLDOWN_DURATION = 5 minutes;
 
