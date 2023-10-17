@@ -20,15 +20,12 @@ contract BondingCurveToken is ERC20 {
     modifier tokenOwnerCooldownOver(address tokenOwner) {
         uint256 timeSinceLastTransaction = block.timestamp - lastTransactionTime[tokenOwner];
         if (timeSinceLastTransaction < COOLDOWN_DURATION) {
-            revert TokenOwnerCooldownNotOverYet(
-                timeSinceLastTransaction,
-                COOLDOWN_DURATION
-            );
+            revert TokenOwnerCooldownNotOverYet(timeSinceLastTransaction, COOLDOWN_DURATION);
         }
         _;
     }
 
-    constructor() ERC20("BondingCurveToken", "BCT") {}
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 
     function buy(uint256 amount) external payable {
         uint256 cost = buyPriceInWei(amount);
@@ -51,8 +48,8 @@ contract BondingCurveToken is ERC20 {
 
         uint256 weiToReturn = sellPriceInWei(amount);
 
-        // Note that it's crucial to burn the tokens only AFTER the price has been computed since the price 
-        // formula depends on the total supply
+        // Note that it's crucial to burn the tokens only AFTER the price has been computed since the price
+        // formula depends on the total supply.
         _burn(msg.sender, amount);
 
         lastTransactionTime[msg.sender] = block.timestamp;
