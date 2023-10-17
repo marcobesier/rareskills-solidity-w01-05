@@ -106,13 +106,4 @@ contract BondingCurveToken is ERC20 {
         uint256 sellPrice = SLOPE * amount * (2 * totalSupply() + 1 - amount) / 2;
         return sellPrice;
     }
-
-    function poolBalanceInWeiActual() public view returns (uint256) {
-        return address(this).balance;
-    }
-
-    function poolBalanceInWeiComputed() public view returns (uint256) {
-        uint256 poolBalance = SLOPE * totalSupply() * (totalSupply() + 1) / 2;
-        return poolBalance;
-    }
 }
