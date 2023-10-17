@@ -9,8 +9,22 @@ contract BondingCurveToken is ERC20 {
 
     mapping(address => uint256) public lastTransactionTime;
 
+    event Buy(address indexed buyer, uint256 amount, uint256 cost);
+    event Sell(address indexed seller, uint256 amount, uint256 payout);
+
+    error TokenOwnerCooldownNotOverYet(uint256 timeSinceLastTransaction, uint256 cooldownDuration);
+    error SentValueDoesNotEqualPrice(uint256 sentValue, uint256 price);
+    error InsufficientTokensToSell(uint256 balance, uint256 amount);
+    error FailedToTransferEtherPayout();
+
     modifier tokenOwnerCooldownOver(address tokenOwner) {
-        require(block.timestamp >= lastTransactionTime[tokenOwner] + COOLDOWN_DURATION, "Token owner cooldown not over");
+        uint256 timeSinceLastTransaction = block.timestamp - lastTransactionTime[tokenOwner];
+        if (timeSinceLastTransaction < COOLDOWN_DURATION) {
+            revert TokenOwnerCooldownNotOverYet(
+                timeSinceLastTransaction,
+                COOLDOWN_DURATION
+            );
+        }
         _;
     }
 
@@ -18,26 +32,38 @@ contract BondingCurveToken is ERC20 {
 
     function buy(uint256 amount) external payable {
         uint256 cost = buyPriceInWei(amount);
-        require(msg.value == cost, "Sent value does not equal price");
+
+        if (msg.value != cost) {
+            revert SentValueDoesNotEqualPrice(msg.value, cost);
+        }
 
         _mint(msg.sender, amount);
 
         lastTransactionTime[msg.sender] = block.timestamp;
+
+        emit Buy(msg.sender, amount, cost);
     }
 
     function sell(uint256 amount) external tokenOwnerCooldownOver(msg.sender) {
-        require(balanceOf(msg.sender) >= amount, "Insufficient tokens to sell");
+        if (balanceOf(msg.sender) < amount) {
+            revert InsufficientTokensToSell(balanceOf(msg.sender), amount);
+        }
 
         _burn(msg.sender, amount);
 
         uint256 weiToReturn = sellPriceInWei(amount);
-        (bool success,) = payable(msg.sender).call{value: weiToReturn}("");
-        require(success, "Failed to transfer ether payout");
 
         lastTransactionTime[msg.sender] = block.timestamp;
+
+        emit Sell(msg.sender, amount, weiToReturn);
+
+        (bool success,) = payable(msg.sender).call{value: weiToReturn}("");
+        if (!success) {
+            revert FailedToTransferEtherPayout();
+        }
     }
 
-    function decimals() public view override returns (uint8) {
+    function decimals() public pure override returns (uint8) {
         return 0;
     }
 
@@ -77,5 +103,14 @@ contract BondingCurveToken is ERC20 {
     function sellPriceInWei(uint256 amount) public view returns (uint256) {
         uint256 sellPrice = SLOPE * amount * (2 * totalSupply() + 1 - amount) / 2;
         return sellPrice;
+    }
+
+    function poolBalanceInWeiActual() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function poolBalanceInWeiComputed() public view returns (uint256) {
+        uint256 poolBalance = SLOPE * totalSupply() * (totalSupply() + 1) / 2;
+        return poolBalance;
     }
 }
