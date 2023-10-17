@@ -45,7 +45,7 @@ contract BondingCurveToken is ERC20 {
 
         emit Buy(msg.sender, amount, msg.value, costInWei, changeInWei);
 
-        if (changeInWei > 0) {
+        if (changeInWei != 0) {
             (bool success,) = payable(msg.sender).call{value: changeInWei}("");
             if (!success) {
                 revert FailedToTransferChange();
