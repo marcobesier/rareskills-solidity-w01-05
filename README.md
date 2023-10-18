@@ -21,7 +21,7 @@ If you haven't installed Foundry yet, you can do so by following the installatio
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/marcobesier/rareskills-solidity-w01-04.git
+git clone https://github.com/marcobesier/rareskills-solidity-w01-05.git
 ```
 
 ### Install Dependencies
@@ -32,7 +32,7 @@ Install the necessary dependencies using forge:
 forge install
 ```
 
-This will install the Solmate contracts which are used in the GodMode contract.
+This will install the OpenZeppelin contract library which is used in the BondingCurveToken contract.
 
 ## License
 
