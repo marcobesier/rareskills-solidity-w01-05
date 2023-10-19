@@ -7,7 +7,6 @@ import {BondingCurveToken} from "../src/BondingCurveToken.sol";
 contract BondingCurveTokenTest is Test {
     BondingCurveToken public bondingCurveToken;
     address public user1;
-    address public user2;
     uint256 public constant COOLDOWN_DURATION = 5 minutes;
 
     event Buy(address indexed buyer, uint256 amount, uint256 paidInWei, uint256 costInWei, uint256 changeInWei);
@@ -21,7 +20,6 @@ contract BondingCurveTokenTest is Test {
 
     function setUp() public {
         user1 = address(0x123);
-        user2 = address(0x456);
         bondingCurveToken = new BondingCurveToken("BondingCurveToken", "BCT");
     }
 
